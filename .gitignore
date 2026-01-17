@@ -1,0 +1,39 @@
+# Build outputs
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# VS Code
+.vscode/
+
+# Rider
+.idea/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+
+# Test results
+TestResults/
+
+# Coverage
+*.coverage
+*.coveragexml
+
+# EF Core
+**/Migrations/
+
+# Docker
+postgres_data/
+
+# Secrets
+appsettings.*.json
+!appsettings.json
+!appsettings.Development.json
