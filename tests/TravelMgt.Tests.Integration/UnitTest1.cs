@@ -35,7 +35,7 @@ public sealed class TravelMgtApiFactory : WebApplicationFactory<Program>
         {
             var settings = new Dictionary<string, string?>
             {
-                ["ConnectionStrings:Default"] = "Host=localhost;Database=travelmgt;Username=postgres;Password=postgres",
+                ["ConnectionStrings:Default"] = "Host=localhost;Database=travelmgt;Username=travelmgt_user;Password=user123",
                 ["Jwt:Issuer"] = "TravelMgt",
                 ["Jwt:Audience"] = "TravelMgt.Api",
                 ["Jwt:SigningKey"] = "TEST_SIGNING_KEY_1234567890",

@@ -13,7 +13,7 @@ public sealed class TravelMgtDbContextFactory : IDesignTimeDbContextFactory<Trav
             .Build();
 
         var connectionString = configuration.GetConnectionString("Default")
-            ?? "Host=localhost;Port=5432;Database=travelmgt;Username=postgres;Password=postgres";
+            ?? "Host=localhost;Port=5432;Database=travelmgt;Username=travelmgt_user;Password=user123";
 
         var optionsBuilder = new DbContextOptionsBuilder<TravelMgtDbContext>();
         optionsBuilder.UseNpgsql(connectionString);
