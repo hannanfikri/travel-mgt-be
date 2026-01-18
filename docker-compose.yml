@@ -36,6 +36,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    ports:
+      - "8080:8080"
 
   caddy:
     image: caddy:2
@@ -44,7 +46,6 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      - "8080:8080"
     environment:
       DOMAIN: ${DOMAIN:-localhost}
       EMAIL: ${ACME_EMAIL:-}
