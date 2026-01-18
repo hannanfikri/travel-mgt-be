@@ -31,7 +31,7 @@ TestResults/
 *.coveragexml
 
 # EF Core
-**/Migrations/
+# Do NOT ignore migrations; commit them so deployments can apply schema changes.
 
 # Docker
 postgres_data/
