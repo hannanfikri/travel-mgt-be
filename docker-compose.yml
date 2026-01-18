@@ -1,30 +1,60 @@
 version: "3.9"
 
 services:
-  api:
-    build: .
-    ports:
-      - "8080:8080"
-    environment:
-      ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__Default: Host=postgres;Port=5432;Database=travelmgt;Username=postgres;Password=postgres
-      Jwt__Issuer: TravelMgt
-      Jwt__Audience: TravelMgt.Api
-      Jwt__SigningKey: CHANGE_ME_USE_A_SECURE_KEY
-      Jwt__ExpiryMinutes: 60
-    depends_on:
-      - postgres
-
-  postgres:
+  db:
     image: postgres:16
+    container_name: travelmgt-db
+    restart: unless-stopped
     environment:
       POSTGRES_DB: travelmgt
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: travelmgt_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me}
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - travelmgt_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: src/TravelMgt.Api/Dockerfile
+    container_name: travelmgt-api
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://0.0.0.0:8080
+      ConnectionStrings__Default: Host=db;Port=5432;Database=travelmgt;Username=travelmgt_user;Password=${POSTGRES_PASSWORD:-change_me}
+      Jwt__Issuer: TravelMgt
+      Jwt__Audience: TravelMgt.Api
+      Jwt__SigningKey: ${JWT_SIGNING_KEY:-CHANGE_ME_USE_A_SECURE_KEY}
+      Jwt__ExpiryMinutes: "60"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  caddy:
+    image: caddy:2
+    container_name: travelmgt-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+      EMAIL: ${ACME_EMAIL:-}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
 
 volumes:
-  postgres_data:
+  travelmgt_pgdata:
+  caddy_data:
+  caddy_config:

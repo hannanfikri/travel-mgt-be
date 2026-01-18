@@ -1,0 +1,14 @@
+{$DOMAIN} {
+	encode gzip
+
+	@hasEmail {
+		expression `{env.EMAIL} != ""`
+	}
+	header @hasEmail "" # no-op; keeps matcher in file
+
+	# If EMAIL is set, Caddy will use it automatically when specified like below.
+	# If not set, Caddy uses its default.
+	email {$EMAIL}
+
+	reverse_proxy api:8080
+}
