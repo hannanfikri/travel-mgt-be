@@ -1,5 +1,6 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Microsoft.OpenApi.Models;
@@ -45,6 +46,12 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructure(builder.Configuration);
+
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<TravelMgtDbContext>(
+        name: "db",
+        failureStatus: HealthStatus.Unhealthy,
+        tags: ["ready"]);
 
 builder.Services.AddCors(options =>
 {
@@ -92,6 +99,27 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapGet("/error", () => Results.Problem("An unexpected error occurred."));
+
+app.MapHealthChecks("/health", new()
+{
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "application/json";
+
+        var payload = new
+        {
+            status = report.Status.ToString(),
+            checks = report.Entries.Select(e => new
+            {
+                name = e.Key,
+                status = e.Value.Status.ToString(),
+                description = e.Value.Description
+            })
+        };
+
+        await context.Response.WriteAsJsonAsync(payload);
+    }
+});
 
 await DataSeeder.SeedAsync(app.Services);
 
